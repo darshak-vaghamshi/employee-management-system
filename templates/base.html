@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title or "Brightcode IT" }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <div class="layout">
+        <header class="hero">
+            <h1>{{ hero_title or "Brightcode IT" }}</h1>
+            <p>{{ hero_subtitle or "Manage your team with ease." }}</p>
+        </header>
+
+        <nav class="nav" aria-label="Primary">
+            <a href="{{ url_for('home') }}"
+                class="nav__link{% if active_page == 'dashboard' %} is-active{% endif %}">Dashboard</a>
+            <a href="{{ url_for('add_employee_page') }}"
+                class="nav__link{% if active_page == 'add' %} is-active{% endif %}">Add Employee</a>
+            <a href="{{ url_for('roster_page') }}"
+                class="nav__link{% if active_page == 'roster' %} is-active{% endif %}">Team Roster</a>
+        </nav>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" defer></script>
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="main main--dashboard">
+    <section class="card dashboard-intro" aria-labelledby="dashboard-title">
+        <header class="card__header">
+            <h2 id="dashboard-title">Welcome back</h2>
+            <p class="muted">Monitor workforce momentum, celebrate new hires, and jump straight into action.</p>
+        </header>
+        {% if summary_error %}
+        <p class="feedback feedback--error">{{ summary_error }}</p>
+        {% endif %}
+        <div class="dashboard-cta">
+            <a class="pill-link" href="{{ url_for('add_employee_page') }}">Add a new employee →</a>
+            <a class="pill-link" href="{{ url_for('roster_page') }}">Open team roster →</a>
+        </div>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Key metrics">
+        <article class="metric-card">
+            <span class="metric-card__label">Total employees</span>
+            <strong class="metric-card__value" data-summary="total_employees">{{ summary.total_employees }}</strong>
+        </article>
+        <article class="metric-card">
+            <span class="metric-card__label">Average salary</span>
+            <strong class="metric-card__value" data-summary="average_salary" data-format="currency">
+                {% if summary.average_salary %}
+                ₹{{ '{:,.0f}'.format(summary.average_salary) }}
+                {% else %}
+                —
+                {% endif %}
+            </strong>
+            <span class="metric-card__hint">Gross per annum</span>
+        </article>
+        <article class="metric-card">
+            <span class="metric-card__label">Average experience</span>
+            <strong class="metric-card__value" data-summary="average_experience">
+                {% if summary.average_experience %}
+                {{ '%.1f'|format(summary.average_experience) }} yrs
+                {% else %}
+                —
+                {% endif %}
+            </strong>
+        </article>
+        <article class="metric-card">
+            <span class="metric-card__label">Busiest department</span>
+            <strong class="metric-card__value" data-summary="top_department">
+                {% if summary.top_department %}
+                {{ summary.top_department.department }}
+                {% else %}
+                —
+                {% endif %}
+            </strong>
+            <span class="metric-card__hint" data-summary-hint="top_department_headcount">
+                {% if summary.top_department %}
+                {{ summary.top_department.headcount }} teammates
+                {% endif %}
+            </span>
+        </article>
+    </section>
+
+    <section class="card recent-hires" aria-labelledby="recent-hires-title">
+        <header class="card__header recent-hires__header">
+            <div>
+                <h2 id="recent-hires-title">Recent hires</h2>
+                <p class="muted">Latest joiners across the company.</p>
+            </div>
+            <a class="pill-link" href="{{ url_for('roster_page') }}">View full roster →</a>
+        </header>
+        {% if summary.recent_hires %}
+        <ul class="recent-hires__list">
+            {% for employee in summary.recent_hires %}
+            <li class="recent-hires__item">
+                <div>
+                    <strong>{{ employee.full_name }}</strong>
+                    <span>{{ employee.designation }} · {{ employee.department }}</span>
+                </div>
+                <time datetime="{{ employee.created_at }}">{{ employee.created_at | replace('T', ' ') }}</time>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">No employees added yet. Start building your team today.</p>
+        {% endif %}
+    </section>
+
+    <section class="card spotlight" aria-labelledby="spotlight-title">
+        <header class="card__header">
+            <h2 id="spotlight-title">Why teams love Brightcode Workforce</h2>
+            <p class="muted">Insightful analytics, frictionless onboarding, and actionable reporting in one place.</p>
+        </header>
+        <div class="spotlight__grid">
+            <article class="spotlight__item">
+                <h3>Real-time metrics</h3>
+                <p>Track salaries, tenure, and headcount trends with live sync from your MongoDB database.</p>
+            </article>
+            <article class="spotlight__item">
+                <h3>Guided onboarding</h3>
+                <p>Smart validations and automation keep data quality high while saving valuable coordinator time.</p>
+            </article>
+            <article class="spotlight__item">
+                <h3>Actionable reporting</h3>
+                <p>Export CSV snapshots or deep dive into department health through interactive charts.</p>
+            </article>
+        </div>
+    </section>
+</main>
+
+<script type="application/json" id="initial-summary">{{ summary | tojson }}</script>
+{% endblock %}

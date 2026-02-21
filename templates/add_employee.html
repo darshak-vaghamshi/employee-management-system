@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="main main--form">
+    <section class="card" aria-labelledby="form-title">
+        <div class="card__header">
+            <h2 id="form-title">Add Employee</h2>
+            <p class="muted">Complete the form to onboard a new teammate.</p>
+        </div>
+        <form id="employee-form" class="form" novalidate>
+            <div class="field-grid">
+                <label class="field" data-field>
+                    <span>Full name *</span>
+                    <input type="text" name="full_name" required />
+                    <small class="field__error" role="alert"></small>
+                </label>
+                <label class="field" data-field>
+                    <span>Corporate email *</span>
+                    <input type="email" name="email" required />
+                    <small class="field__error" role="alert"></small>
+                </label>
+                <label class="field" data-field>
+                    <span>Department *</span>
+                    <input type="text" name="department" required />
+                    <small class="field__error" role="alert"></small>
+                </label>
+                <label class="field" data-field>
+                    <span>Designation *</span>
+                    <input type="text" name="designation" required />
+                    <small class="field__error" role="alert"></small>
+                </label>
+                <label class="field" data-field>
+                    <span>Experience (years)</span>
+                    <input type="number" step="0.1" name="experience_years" min="0" />
+                    <small class="field__error" role="alert"></small>
+                </label>
+                <label class="field" data-field>
+                    <span>Annual salary (₹)</span>
+                    <input type="number" step="0.01" name="salary" min="0" />
+                    <small class="field__error" role="alert"></small>
+                </label>
+            </div>
+            <div class="form__actions">
+                <button type="submit" class="button">Save employee</button>
+            </div>
+            <p id="form-feedback" class="feedback" role="alert" hidden></p>
+        </form>
+    </section>
+</main>
+{% endblock %}
