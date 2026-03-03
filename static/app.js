@@ -132,6 +132,8 @@ const validateAndBuildPayload = (formElement) => {
     requireField("email", "Corporate email is required.");
     requireField("department", "Department is required.");
     requireField("designation", "Designation is required.");
+    requireField("dob", "Date of birth is required.");
+    requireField("hire_date", "Hire date is required.");
 
     const emailWrapper = getFieldWrapper(formElement, "email");
     if (payload.email) {
@@ -318,7 +320,8 @@ const refreshSummary = async () => {
         updateSummaryCards();
     } catch (error) {
         console.error(error);
-        createToast(error.message, "error", 4000);
+        const message = error.message.includes('fetch') ? "Unable to fetch summary metrics. Please check your connection." : error.message;
+        createToast(message, "error", 4000);
     }
 };
 
@@ -332,7 +335,8 @@ const refreshDepartmentMetrics = async () => {
         renderDepartmentCharts();
     } catch (error) {
         console.error(error);
-        createToast(error.message, "error", 4000);
+        const message = error.message.includes('fetch') ? "Unable to fetch department metrics. Please check your connection." : error.message;
+        createToast(message, "error", 4000);
     }
 };
 
@@ -378,7 +382,7 @@ const renderEmployees = () => {
     if (filtered.length === 0) {
         const emptyRow = document.createElement("tr");
         emptyRow.innerHTML =
-            '<td class="table__empty" colspan="7">No employees match the current filters.</td>';
+            '<td class="table__empty" colspan="9">No employees match the current filters.</td>';
         tableBody.appendChild(emptyRow);
     } else {
         filtered.forEach((employee) => {
@@ -431,6 +435,15 @@ const formatDate = (iso) => {
     });
 };
 
+const formatDateOnly = (iso) => {
+    if (!iso) return "—";
+    const date = new Date(iso);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+};
+
 const buildRow = (employee) => {
     const tr = document.createElement("tr");
     tr.dataset.employeeId = employee.id;
@@ -445,6 +458,8 @@ const buildRow = (employee) => {
     <td>${employee.designation}</td>
     <td>${formatExperience(employee.experience_years)}</td>
     <td>${formatCurrency(employee.salary)}</td>
+    <td>${formatDateOnly(employee.dob)}</td>
+    <td>${formatDateOnly(employee.hire_date)}</td>
     <td>${formatDate(employee.created_at)}</td>
     <td class="table__actions">
       <button type="button" class="action-button action-button--edit" data-action="edit">Edit</button>
@@ -530,9 +545,10 @@ const loadEmployees = async () => {
         state.employees = Array.isArray(employees) ? employees : [];
         renderEmployees();
     } catch (error) {
+        const message = error.message.includes('fetch') ? "Unable to load employees. Please check your connection." : error.message;
         const feedbackNode = rosterFeedback || formFeedback;
         if (feedbackNode) {
-            setFeedback(feedbackNode, error.message, "error");
+            setFeedback(feedbackNode, message, "error");
         }
     }
 };
@@ -547,6 +563,8 @@ const populateEditForm = (employee) => {
         designation: employee.designation || "",
         experience_years: employee.experience_years ?? "",
         salary: employee.salary ?? "",
+        dob: employee.dob || "",
+        hire_date: employee.hire_date || "",
     };
 
     Object.entries(entries).forEach(([name, value]) => {
@@ -579,8 +597,9 @@ const handleEditClick = async (employeeId) => {
         populateEditForm(employee);
         toggleModal(editModal, true);
     } catch (error) {
-        setFeedback(rosterFeedback || formFeedback, error.message, "error");
-        createToast(error.message, "error", 4000);
+        const message = error.message.includes('fetch') ? "Unable to fetch employee details. Please check your connection." : error.message;
+        setFeedback(rosterFeedback || formFeedback, message, "error");
+        createToast(message, "error", 4000);
     }
 };
 
@@ -629,8 +648,9 @@ if (form) {
             resetForm();
             setFeedback(formFeedback, "", "success");
         } catch (error) {
-            setFeedback(formFeedback, error.message, "error");
-            createToast(error.message, "error", 4000);
+            const message = error.message.includes('fetch') ? "Unable to save employee. Please check your connection." : error.message;
+            setFeedback(formFeedback, message, "error");
+            createToast(message, "error", 4000);
         }
     });
 }
@@ -689,8 +709,9 @@ if (editForm) {
             createToast("Employee updated successfully.", "success");
             toggleModal(editModal, false);
         } catch (error) {
-            setFeedback(editFeedback, error.message, "error");
-            createToast(error.message, "error", 4000);
+            const message = error.message.includes('fetch') ? "Unable to update employee. Please check your connection." : error.message;
+            setFeedback(editFeedback, message, "error");
+            createToast(message, "error", 4000);
         }
     });
 }
@@ -749,7 +770,8 @@ if (exportButton) {
 
             createToast("CSV export started.", "success");
         } catch (error) {
-            createToast(error.message, "error", 4000);
+            const message = error.message.includes('fetch') ? "Unable to export employees. Please check your connection." : error.message;
+            createToast(message, "error", 4000);
         } finally {
             exportButton.disabled = false;
         }
@@ -808,7 +830,8 @@ if (deleteConfirm) {
         } catch (error) {
             upsertEmployee(employee);
             renderEmployees();
-            createToast(error.message, "error", 4000);
+            const message = error.message.includes('fetch') ? "Unable to delete employee. Please check your connection." : error.message;
+            createToast(message, "error", 4000);
         } finally {
             deleteConfirm.disabled = false;
         }

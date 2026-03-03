@@ -1,4 +1,4 @@
-# Brightcode IT Employee Management System
+# Brightcode Workforce Employee Management System
 
 A Flask-based web application for managing IT company employee details with MongoDB backend.
 
@@ -81,6 +81,7 @@ A Flask-based web application for managing IT company employee details with Mong
 - `/` - Dashboard with employee insights
 - `/add` - Add new employee form
 - `/roster` - Employee roster listing
+- `/employee/<employee_id>` - Individual employee profile
 
 ## Employee Data Model
 
@@ -99,16 +100,24 @@ A Flask-based web application for managing IT company employee details with Mong
 ## Project Structure
 
 ```
-demo_database/
-├── main.py              # Main Flask application
-├── requirements.txt     # Python dependencies
-├── .gitignore          # Git ignore rules
-├── static/             # Static assets (CSS, JS, images)
-├── templates/          # HTML templates
-│   ├── index.html      # Dashboard page
-│   ├── add_employee.html # Add employee form
-│   └── roster.html     # Employee roster
-└── venv/               # Virtual environment
+employee-management-system/
+├── main.py                    # Main Flask application
+├── requirements.txt           # Python dependencies
+├── .env.example              # Environment variables template
+├── .gitignore                # Git ignore rules
+├── README.md                 # Project documentation
+├── static/                   # Static assets (CSS, JS, images)
+│   ├── advanced-dashboard.js # Advanced dashboard JavaScript
+│   ├── app.js               # Frontend JavaScript
+│   └── style.css            # Application styles
+├── templates/                # HTML templates
+│   ├── advanced_dashboard.html # Advanced dashboard page
+│   ├── add_employee.html    # Add employee form
+│   ├── base.html            # Base template
+│   ├── employee_profile.html # Individual employee profile
+│   ├── index.html           # Dashboard page
+│   └── roster.html          # Employee roster with edit modal
+└── uploads/                  # Uploaded employee photos (created dynamically)
 ```
 
 ## Development

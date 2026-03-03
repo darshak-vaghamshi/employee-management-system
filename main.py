@@ -42,6 +42,8 @@ def create_app() -> Flask:
         """Convert a MongoDB document into a JSON-friendly dictionary."""
 
         created_at = document.get("created_at")
+        dob = document.get("dob")
+        hire_date = document.get("hire_date")
         return {
             "id": str(document.get("_id")),
             "full_name": document.get("full_name", ""),
@@ -50,7 +52,9 @@ def create_app() -> Flask:
             "designation": document.get("designation", ""),
             "experience_years": document.get("experience_years"),
             "salary": document.get("salary"),
-            "created_at": created_at.isoformat() if created_at else None,
+            "dob": dob.isoformat()[:10] if isinstance(dob, datetime) else dob,
+            "hire_date": hire_date.isoformat()[:10] if isinstance(hire_date, datetime) else hire_date,
+            "created_at": (created_at.isoformat() + 'Z') if created_at else None,
         }
 
     def fetch_department_metrics() -> List[Dict[str, Any]]:
@@ -155,7 +159,7 @@ def create_app() -> Flask:
 
         return render_template(
             "index.html",
-            title="Brightcode IT — Team Intelligence",
+            title="Brightcode Workforce — Team Intelligence",
             hero_title="Brightcode Workforce",
             hero_subtitle="A single source for people analytics, onboarding, and growth.",
             active_page="dashboard",
@@ -169,8 +173,8 @@ def create_app() -> Flask:
 
         return render_template(
             "add_employee.html",
-            title="Add Employee — Brightcode IT",
-            hero_title="Brightcode IT",
+            title="Add Employee — Brightcode Workforce",
+            hero_title="Brightcode Workforce",
             hero_subtitle="Track and grow your team with live employee insights.",
             active_page="add",
         )
@@ -199,7 +203,7 @@ def create_app() -> Flask:
 
         return render_template(
             "roster.html",
-            title="Team Roster — Brightcode IT",
+            title="Team Roster — Brightcode Workforce",
             hero_title="Team Roster",
             hero_subtitle="Browse employee profiles, insights, and department trends.",
             active_page="roster",
@@ -291,12 +295,16 @@ def create_app() -> Flask:
                 "Designation",
                 "Experience (years)",
                 "Salary",
+                "Date of birth",
+                "Hire date",
                 "Created at",
             ]
         )
 
         for document in cursor:
             created_at: Optional[datetime] = document.get("created_at")
+            dob = document.get("dob")
+            hire_date = document.get("hire_date")
             writer.writerow(
                 [
                     document.get("full_name", ""),
@@ -305,7 +313,9 @@ def create_app() -> Flask:
                     document.get("designation", ""),
                     document.get("experience_years", ""),
                     document.get("salary", ""),
-                    created_at.isoformat() if isinstance(created_at, datetime) else "",
+                    dob.isoformat()[:10] if isinstance(dob, datetime) else dob or "",
+                    hire_date.isoformat()[:10] if isinstance(hire_date, datetime) else hire_date or "",
+                    created_at.isoformat() + 'Z' if isinstance(created_at, datetime) else "",
                 ]
             )
 
@@ -359,6 +369,20 @@ def create_app() -> Flask:
         except (TypeError, ValueError):
             return jsonify({"error": "Salary must be a numeric value."}), 400
 
+        # Validate dob and hire_date
+        if not payload.get("dob") or not payload.get("hire_date"):
+            return jsonify({"error": "Date of birth and hire date are required."}), 400
+
+        try:
+            from datetime import date
+            dob_date = date.fromisoformat(payload["dob"])
+            hire_date = date.fromisoformat(payload["hire_date"])
+        except ValueError:
+            return jsonify({"error": "Invalid date format for date of birth or hire date."}), 400
+
+        if dob_date >= hire_date:
+            return jsonify({"error": "Date of birth must be before hire date."}), 400
+
         employee_doc = {
             "full_name": payload["full_name"].strip(),
             "email": payload["email"].strip().lower(),
@@ -366,6 +390,8 @@ def create_app() -> Flask:
             "designation": payload["designation"].strip(),
             "experience_years": experience_years,
             "salary": salary,
+            "dob": payload.get("dob"),
+            "hire_date": payload.get("hire_date"),
             "created_at": datetime.utcnow(),
         }
 
@@ -417,7 +443,7 @@ def create_app() -> Flask:
 
         payload = request.get_json(silent=True) or {}
 
-        required_fields = ["full_name", "email", "department", "designation"]
+        required_fields = ["full_name", "email", "department", "designation", "dob", "hire_date"]
         missing_fields = [field for field in required_fields if not payload.get(field)]
         if missing_fields:
             return (
@@ -445,6 +471,17 @@ def create_app() -> Flask:
         except (TypeError, ValueError):
             return jsonify({"error": "Salary must be a numeric value."}), 400
 
+        # Validate dob and hire_date
+        try:
+            from datetime import date
+            dob_date = date.fromisoformat(payload["dob"])
+            hire_date = date.fromisoformat(payload["hire_date"])
+        except ValueError:
+            return jsonify({"error": "Invalid date format for date of birth or hire date."}), 400
+
+        if dob_date >= hire_date:
+            return jsonify({"error": "Date of birth must be before hire date."}), 400
+
         update_data = {
             "full_name": payload["full_name"].strip(),
             "email": payload["email"].strip().lower(),
@@ -452,6 +489,8 @@ def create_app() -> Flask:
             "designation": payload["designation"].strip(),
             "experience_years": experience_years,
             "salary": salary,
+            "dob": payload.get("dob"),
+            "hire_date": payload.get("hire_date"),
         }
 
         try:
@@ -502,8 +541,7 @@ def create_app() -> Flask:
     return app
 
 
-app = create_app()
-
 
 if __name__ == "__main__":
+    app = create_app()
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=True)

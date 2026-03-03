@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="main main--dashboard">
+    <section class="card dashboard-intro" aria-labelledby="dashboard-title">
+        <header class="card__header">
+            <h1 id="dashboard-title">Advanced Dashboard</h1>
+            <p class="muted">Real-time analytics, insights, and workforce trends.</p>
+        </header>
+        <div class="dashboard-cta">
+            <a class="pill-link" href="{{ url_for('add_employee_page') }}">Add Employee →</a>
+            <a class="pill-link" href="{{ url_for('roster_page') }}">View Roster →</a>
+        </div>
+    </section>
+
+    <!-- Quick Stats Section -->
+    <section class="dashboard-grid" aria-label="Quick Statistics">
+        <article class="metric-card metric-card--primary">
+            <span class="metric-card__label">New Hires This Month</span>
+            <strong class="metric-card__value" id="new-hires-month">-</strong>
+            <span class="metric-card__trend" id="hires-trend">Loading...</span>
+        </article>
+
+        <article class="metric-card metric-card--secondary">
+            <span class="metric-card__label">Turnover Rate</span>
+            <strong class="metric-card__value" id="turnover-rate">-</strong>
+            <span class="metric-card__hint">Monthly percentage</span>
+        </article>
+
+        <article class="metric-card metric-card--success">
+            <span class="metric-card__label">Total Employees</span>
+            <strong class="metric-card__value" id="total-employees">-</strong>
+            <span class="metric-card__hint">Across all departments</span>
+        </article>
+
+        <article class="metric-card metric-card--warning">
+            <span class="metric-card__label">Avg Salary</span>
+            <strong class="metric-card__value" id="avg-salary">-</strong>
+            <span class="metric-card__hint">Company-wide average</span>
+        </article>
+    </section>
+
+    <!-- Charts Section -->
+    <section class="dashboard-charts" aria-label="Analytics Charts">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2>Department Distribution</h2>
+                <div class="chart-controls">
+                    <button class="chart-filter active" data-chart="headcount">Headcount</button>
+                    <button class="chart-filter" data-chart="salary">Avg Salary</button>
+                </div>
+            </div>
+            <canvas id="department-chart" width="400" height="200"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2>Salary Trends by Department</h2>
+                <div class="chart-legend" id="salary-legend"></div>
+            </div>
+            <canvas id="salary-trends-chart" width="400" height="200"></canvas>
+        </div>
+    </section>
+
+    <!-- Events and Activity Grid -->
+    <div class="dashboard-events-grid">
+        <!-- Upcoming Events -->
+        <section class="card upcoming-events" aria-labelledby="events-title">
+            <header class="card__header">
+                <h2 id="events-title">Upcoming Events</h2>
+                <div class="event-tabs">
+                    <button class="event-tab active" data-tab="birthdays">🎂 Birthdays</button>
+                    <button class="event-tab" data-tab="anniversaries">🎉 Anniversaries</button>
+                    <button class="event-tab" data-tab="probation">📋 Probation End</button>
+                </div>
+            </header>
+            
+            <div class="event-content" id="birthdays-content">
+                <div class="loading-placeholder">Loading upcoming birthdays...</div>
+            </div>
+            <div class="event-content hidden" id="anniversaries-content">
+                <div class="loading-placeholder">Loading upcoming anniversaries...</div>
+            </div>
+            <div class="event-content hidden" id="probation-content">
+                <div class="loading-placeholder">Loading probation end dates...</div>
+            </div>
+        </section>
+
+        <!-- Activity Feed -->
+        <section class="card activity-feed" aria-labelledby="activity-title">
+            <header class="card__header">
+                <h2 id="activity-title">Recent Activity</h2>
+                <button class="refresh-btn" id="refresh-activity">🔄 Refresh</button>
+            </header>
+            <div class="activity-list" id="activity-list">
+                <div class="loading-placeholder">Loading recent activity...</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Department Growth -->
+    <section class="card department-growth" aria-labelledby="growth-title">
+        <header class="card__header">
+            <h2 id="growth-title">Department Growth This Month</h2>
+            <p class="muted">Top growing departments by new hires</p>
+        </header>
+        <div class="growth-list" id="growth-list">
+            <div class="loading-placeholder">Loading growth data...</div>
+        </div>
+    </section>
+</main>
+
+<!-- Templates for dynamic content -->
+<template id="birthday-template">
+    <div class="event-item">
+        <div class="event-icon">🎂</div>
+        <div class="event-details">
+            <strong class="event-name">{{name}}</strong>
+            <span class="event-date">{{date}}</span>
+            <span class="event-meta">Age {{age}} • {{days}} days</span>
+        </div>
+    </div>
+</template>
+
+<template id="anniversary-template">
+    <div class="event-item">
+        <div class="event-icon">🎉</div>
+        <div class="event-details">
+            <strong class="event-name">{{name}}</strong>
+            <span class="event-date">{{date}}</span>
+            <span class="event-meta">{{years}} years • {{days}} days</span>
+        </div>
+    </div>
+</template>
+
+<template id="probation-template">
+    <div class="event-item">
+        <div class="event-icon">📋</div>
+        <div class="event-details">
+            <strong class="event-name">{{name}}</strong>
+            <span class="event-date">{{date}}</span>
+            <span class="event-meta">{{days}} days remaining</span>
+        </div>
+    </div>
+</template>
+
+<template id="activity-template">
+    <div class="activity-item">
+        <div class="activity-icon">👤</div>
+        <div class="activity-details">
+            <p class="activity-description">{{description}}</p>
+            <time class="activity-time" datetime="{{timestamp}}">{{time}}</time>
+        </div>
+    </div>
+</template>
+
+<template id="growth-template">
+    <div class="growth-item">
+        <div class="growth-department">
+            <strong>{{department}}</strong>
+            <span class="growth-count">{{new_hires}} new hires</span>
+        </div>
+        <div class="growth-stats">
+            <span class="growth-percentage">+{{percentage}}%</span>
+            <span class="growth-total">of {{total}} total</span>
+        </div>
+    </div>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/advanced-dashboard.js"></script>
+
+{% endblock %}
