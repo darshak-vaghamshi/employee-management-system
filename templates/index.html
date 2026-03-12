@@ -10,53 +10,125 @@
         {% if summary_error %}
         <p class="feedback feedback--error">{{ summary_error }}</p>
         {% endif %}
+        <section class="dashboard-grid" aria-label="Key metrics">
+            {% if summary_error %}
+            <p class="feedback feedback--error" role="alert">{{ summary_error }}</p>
+            {% endif %}
+            <article class="metric-card">
+                <span class="metric-card__label">Total employees</span>
+                <strong class="metric-card__value" data-summary="total_employees">{{ summary.total_employees }}</strong>
+            </article>
+            <article class="metric-card">
+                <span class="metric-card__label">Average salary</span>
+                <strong class="metric-card__value" data-summary="average_salary" data-format="currency">
+                    {% if summary.average_salary %}
+                    ₹{{ '{:,.0f}'.format(summary.average_salary) }}
+                    {% else %}
+                    —
+                    {% endif %}
+                </strong>
+                <span class="metric-card__hint">Gross per annum</span>
+            </article>
+            <article class="metric-card">
+                <span class="metric-card__label">Average experience</span>
+                <strong class="metric-card__value" data-summary="average_experience">
+                    {% if summary.average_experience %}
+                    {{ '%.1f'|format(summary.average_experience) }} yrs
+                    {% else %}
+                    —
+                    {% endif %}
+                </strong>
+            </article>
+            <article class="metric-card">
+                <span class="metric-card__label">Busiest department</span>
+                <strong class="metric-card__value" data-summary="top_department">
+                    {% if summary.top_department %}
+                    {{ summary.top_department.department }}
+                    {% else %}
+                    —
+                    {% endif %}
+                </strong>
+                <span class="metric-card__hint" data-summary-hint="top_department_headcount">
+                    {% if summary.top_department %}
+                    {{ summary.top_department.headcount }} teammates
+                    {% endif %}
+                </span>
+            </article>
+        </section>
         <div class="dashboard-cta">
             <a class="pill-link" href="{{ url_for('add_employee_page') }}">Add a new employee →</a>
             <a class="pill-link" href="{{ url_for('roster_page') }}">Open team roster →</a>
         </div>
     </section>
 
-    <section class="dashboard-grid" aria-label="Key metrics">
-        <article class="metric-card">
-            <span class="metric-card__label">Total employees</span>
-            <strong class="metric-card__value" data-summary="total_employees">{{ summary.total_employees }}</strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-card__label">Average salary</span>
-            <strong class="metric-card__value" data-summary="average_salary" data-format="currency">
-                {% if summary.average_salary %}
-                ₹{{ '{:,.0f}'.format(summary.average_salary) }}
-                {% else %}
-                —
-                {% endif %}
-            </strong>
-            <span class="metric-card__hint">Gross per annum</span>
-        </article>
-        <article class="metric-card">
-            <span class="metric-card__label">Average experience</span>
-            <strong class="metric-card__value" data-summary="average_experience">
-                {% if summary.average_experience %}
-                {{ '%.1f'|format(summary.average_experience) }} yrs
-                {% else %}
-                —
-                {% endif %}
-            </strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-card__label">Busiest department</span>
-            <strong class="metric-card__value" data-summary="top_department">
-                {% if summary.top_department %}
-                {{ summary.top_department.department }}
-                {% else %}
-                —
-                {% endif %}
-            </strong>
-            <span class="metric-card__hint" data-summary-hint="top_department_headcount">
-                {% if summary.top_department %}
-                {{ summary.top_department.headcount }} teammates
-                {% endif %}
-            </span>
-        </article>
+
+
+    
+    <section class="card department-health" aria-labelledby="department-health-title">
+        <header class="card__header">
+            <h2 id="department-health-title">Department health</h2>
+            <p class="muted">Compare headcount and compensation across departments.</p>
+        </header>
+        <div class="charts__grid">
+            <!-- Headcount Chart -->
+            <div class="chart-panel">
+                <div class="chart-header">
+                    <h3>Headcount</h3>
+                </div>
+                <div class="chart-content">
+                    <div class="chart-container">
+                        <canvas id="headcountChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Salary Trend Chart -->
+            <div class="chart-panel">
+                <div class="chart-header">
+                    <h3>Average salary trend</h3>
+                </div>
+                <div class="chart-content">
+                    <div class="chart-container">
+                        <canvas id="averageSalaryTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="charts" aria-label="Analytics Dashboard">
+        <div class="charts__grid">
+            <!-- Department Distribution Chart -->
+            <div class="chart-panel">
+                <div class="chart-header">
+                    <h3>Department Distribution</h3>
+                    <div class="toggle-buttons">
+                        <button class="toggle-btn active" data-metric="headcount">Headcount</button>
+                        <button class="toggle-btn" data-metric="avg_salary">Avg Salary</button>
+                    </div>
+                </div>
+                <div class="chart-content">
+                    <div class="chart-container">
+                        <canvas id="departmentChart"></canvas>
+                    </div>
+                    <div class="chart-legend" id="departmentLegend">
+                        <!-- Legend will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Salary Trends Chart -->
+            <div class="chart-panel">
+                <div class="chart-header">
+                    <h3>Salary Trends by Department</h3>
+                </div>
+                <div class="chart-content">
+                    <div class="chart-container">
+                        <canvas id="salaryTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <section class="card recent-hires" aria-labelledby="recent-hires-title">
@@ -107,4 +179,5 @@
 </main>
 
 <script type="application/json" id="initial-summary">{{ summary | tojson }}</script>
+<script type="application/json" id="chart-data">{{ chart_data | tojson }}</script>
 {% endblock %}

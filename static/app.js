@@ -838,6 +838,364 @@ if (deleteConfirm) {
     });
 }
 
+// Dashboard Charts Implementation
+const dashboardChartsScript = document.getElementById("chart-data");
+const departmentCanvas = document.getElementById("departmentChart");
+const salaryTrendsCanvas = document.getElementById("salaryTrendsChart");
+const headcountCanvas = document.getElementById("headcountChart");
+const averageSalaryTrendCanvas = document.getElementById("averageSalaryTrendChart");
+
+const dashboardState = {
+    chartData: parseInitialData(dashboardChartsScript) || {},
+    charts: {
+        department: null,
+        salaryTrends: null,
+        headcount: null,
+        averageSalaryTrend: null
+    },
+    currentMetric: 'headcount'
+};
+
+// Sample data matching the image
+const defaultChartData = {
+    departmentDistribution: {
+        headcount: {
+            labels: ['Development', 'Design', 'HR', 'Marketing', 'Sales'],
+            data: [35, 18, 12, 15, 20],
+            colors: ['#7d4f50', '#a67c7d', '#d4a5a6', '#e8c4c5', '#f2d9da']
+        },
+        avgSalary: {
+            labels: ['Development', 'Design', 'HR', 'Marketing', 'Sales'],
+            data: [85000, 65000, 55000, 60000, 70000],
+            colors: ['#7d4f50', '#a67c7d', '#d4a5a6', '#e8c4c5', '#f2d9da']
+        }
+    },
+    salaryTrends: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [
+            {
+                label: 'Development',
+                data: [75000, 78000, 80000, 82000, 84000, 85000],
+                borderColor: '#7d4f50',
+                backgroundColor: 'rgba(125, 79, 80, 0.1)',
+                tension: 0.3
+            },
+            {
+                label: 'Design',
+                data: [55000, 58000, 60000, 62000, 64000, 65000],
+                borderColor: '#a67c7d',
+                backgroundColor: 'rgba(166, 124, 125, 0.1)',
+                tension: 0.3
+            },
+            {
+                label: 'HR',
+                data: [45000, 48000, 50000, 52000, 54000, 55000],
+                borderColor: '#d4a5a6',
+                backgroundColor: 'rgba(212, 165, 166, 0.1)',
+                tension: 0.3
+            },
+            {
+                label: 'Marketing',
+                data: [50000, 53000, 56000, 58000, 59000, 60000],
+                borderColor: '#e8c4c5',
+                backgroundColor: 'rgba(232, 196, 197, 0.1)',
+                tension: 0.3
+            },
+            {
+                label: 'Sales',
+                data: [60000, 63000, 65000, 67000, 69000, 70000],
+                borderColor: '#f2d9da',
+                backgroundColor: 'rgba(242, 217, 218, 0.1)',
+                tension: 0.3
+            }
+        ]
+    }
+};
+
+const createDepartmentLegend = (data, colors) => {
+    const legendContainer = document.getElementById("departmentLegend");
+    if (!legendContainer) return;
+
+    const total = data.reduce((sum, value) => sum + value, 0);
+    legendContainer.innerHTML = '';
+
+    data.forEach((value, index) => {
+        const percentage = ((value / total) * 100).toFixed(0);
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        legendItem.innerHTML = `
+            <div class="legend-color" style="background-color: ${colors[index]}"></div>
+            <span class="legend-label">${dashboardState.chartData.departmentDistribution?.headcount?.labels[index] || ''}</span>
+            <span class="legend-value">${percentage}%</span>
+        `;
+        legendContainer.appendChild(legendItem);
+    });
+};
+
+const renderDepartmentChart = () => {
+    if (!window.Chart || !departmentCanvas) return;
+
+    const data = dashboardState.chartData.departmentDistribution || defaultChartData.departmentDistribution;
+    const currentData = data[dashboardState.currentMetric];
+
+    if (dashboardState.charts.department) {
+        dashboardState.charts.department.data.datasets[0].data = currentData.data;
+        dashboardState.charts.department.update();
+        createDepartmentLegend(currentData.data, currentData.colors);
+    } else {
+        dashboardState.charts.department = new Chart(departmentCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: currentData.labels,
+                datasets: [{
+                    data: currentData.data,
+                    backgroundColor: currentData.colors,
+                    borderWidth: 0,
+                    cutout: '70%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(0);
+                                return `${context.label}: ${percentage}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        createDepartmentLegend(currentData.data, currentData.colors);
+    }
+};
+
+const renderSalaryTrendsChart = () => {
+    if (!window.Chart || !salaryTrendsCanvas) return;
+
+    const data = dashboardState.chartData.salaryTrends || defaultChartData.salaryTrends;
+
+    if (dashboardState.charts.salaryTrends) {
+        dashboardState.charts.salaryTrends.data = data;
+        dashboardState.charts.salaryTrends.update();
+    } else {
+        dashboardState.charts.salaryTrends = new Chart(salaryTrendsCanvas, {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD',
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
+                                }).format(context.parsed.y);
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 50000,
+                        max: 90000,
+                        ticks: {
+                            callback: (value) => {
+                                return new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD',
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
+                                }).format(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+};
+
+const renderHeadcountChart = () => {
+    if (!window.Chart || !headcountCanvas) return;
+
+    const data = dashboardState.chartData.departmentDistribution?.headcount || defaultChartData.departmentDistribution.headcount;
+
+    if (dashboardState.charts.headcount) {
+        dashboardState.charts.headcount.data.labels = data.labels;
+        dashboardState.charts.headcount.data.datasets[0].data = data.data;
+        dashboardState.charts.headcount.update();
+    } else {
+        dashboardState.charts.headcount = new Chart(headcountCanvas, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Headcount',
+                    data: data.data,
+                    backgroundColor: data.colors,
+                    borderRadius: 8,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                return `Headcount: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+};
+
+const renderAverageSalaryTrendChart = () => {
+    if (!window.Chart || !averageSalaryTrendCanvas) return;
+
+    const data = dashboardState.chartData.departmentDistribution?.avgSalary || defaultChartData.departmentDistribution.avgSalary;
+
+    if (dashboardState.charts.averageSalaryTrend) {
+        dashboardState.charts.averageSalaryTrend.data.labels = data.labels;
+        dashboardState.charts.averageSalaryTrend.data.datasets[0].data = data.data;
+        dashboardState.charts.averageSalaryTrend.update();
+    } else {
+        dashboardState.charts.averageSalaryTrend = new Chart(averageSalaryTrendCanvas, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Average Salary',
+                    data: data.data,
+                    borderColor: '#7d4f50',
+                    backgroundColor: 'rgba(125, 79, 80, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: '#7d4f50',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                return new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD',
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
+                                }).format(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: (value) => {
+                                return new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD',
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
+                                }).format(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+};
+
+const initializeDashboardCharts = () => {
+    // Use provided data or default data
+    if (!dashboardState.chartData || Object.keys(dashboardState.chartData).length === 0) {
+        dashboardState.chartData = defaultChartData;
+    }
+
+    // Render all charts
+    renderHeadcountChart();
+    renderAverageSalaryTrendChart();
+    renderDepartmentChart();
+    renderSalaryTrendsChart();
+
+    // Toggle button functionality
+    const toggleButtons = document.querySelectorAll('.toggle-btn');
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            toggleButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            dashboardState.currentMetric = button.dataset.metric;
+            renderDepartmentChart();
+        });
+    });
+};
+
+// Initialize dashboard charts if on dashboard page
+if (departmentCanvas || salaryTrendsCanvas || headcountCanvas || averageSalaryTrendCanvas) {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeDashboardCharts);
+    } else {
+        initializeDashboardCharts();
+    }
+}
+
 updateSummaryCards();
 renderDepartmentCharts();
 loadEmployees();

@@ -137,6 +137,85 @@ def create_app() -> Flask:
             "top_department": top_department,
         }
 
+    def generate_chart_data() -> Dict[str, Any]:
+        """Generate chart data for the dashboard analytics."""
+        
+        # Get department distribution data
+        department_pipeline = [
+            {"$group": {"_id": "$department", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}}
+        ]
+        
+        department_counts = list(db.employees.aggregate(department_pipeline))
+        
+        # Get average salary by department
+        salary_pipeline = [
+            {"$match": {"salary": {"$ne": None}}},
+            {"$group": {"_id": "$department", "avg_salary": {"$avg": "$salary"}}},
+            {"$sort": {"avg_salary": -1}}
+        ]
+        
+        department_salaries = list(db.employees.aggregate(salary_pipeline))
+        
+        # Prepare department labels and data
+        dept_labels = []
+        headcount_data = []
+        avg_salary_data = []
+        
+        # Create a mapping for consistent department ordering
+        dept_map = {dept["_id"]: dept for dept in department_counts}
+        
+        for dept in department_counts:
+            dept_name = dept["_id"]
+            if dept_name:  # Skip None values
+                dept_labels.append(dept_name)
+                headcount_data.append(dept["count"])
+                
+                # Find corresponding salary data
+                avg_salary = next((d["avg_salary"] for d in department_salaries if d["_id"] == dept_name), 0)
+                avg_salary_data.append(avg_salary)
+        
+        # Generate sample salary trends data (6 months)
+        # In a real application, this would come from historical data
+        months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+        salary_trends = {
+            "labels": months,
+            "datasets": []
+        }
+        
+        # Create trend lines for each department
+        colors = ["#7d4f50", "#a67c7d", "#d4a5a6", "#e8c4c5", "#f2d9da"]
+        for i, dept_name in enumerate(dept_labels[:5]):  # Limit to top 5 departments
+            base_salary = avg_salary_data[i] if i < len(avg_salary_data) else 60000
+            # Generate realistic trend data
+            trend_data = [
+                base_salary * 0.9 + (base_salary * 0.1 * (j / 5)) 
+                for j in range(6)
+            ]
+            salary_trends["datasets"].append({
+                "label": dept_name,
+                "data": trend_data,
+                "borderColor": colors[i % len(colors)],
+                "backgroundColor": colors[i % len(colors)].replace(")", ", 0.1)").replace("rgb", "rgba"),
+                "tension": 0.3
+            })
+        
+        return {
+            "departmentDistribution": {
+                "headcount": {
+                    "labels": dept_labels,
+                    "data": headcount_data,
+                    "colors": colors[:len(dept_labels)]
+                },
+                "avgSalary": {
+                    "labels": dept_labels,
+                    "data": avg_salary_data,
+                    "colors": colors[:len(dept_labels)]
+                }
+            },
+            "salaryTrends": salary_trends
+        }
+
     @app.route("/")
     def home() -> str:
         """Render the landing dashboard with recent activity and key metrics."""
@@ -157,6 +236,9 @@ def create_app() -> Flask:
                 "top_department": None,
             }
 
+        # Generate chart data for the dashboard
+        chart_data = generate_chart_data()
+
         return render_template(
             "index.html",
             title="Brightcode Workforce — Team Intelligence",
@@ -165,6 +247,7 @@ def create_app() -> Flask:
             active_page="dashboard",
             summary=summary,
             summary_error=summary_error,
+            chart_data=chart_data,
         )
 
     @app.route("/add")

@@ -8,13 +8,13 @@ A Flask-based web application for managing IT company employee details with Mong
 - **Dashboard**: Real-time analytics and employee insights
 - **Department Metrics**: Aggregate statistics by department
 - **CSV Export**: Export employee data to CSV format
-- **Responsive Design**: Modern web interface with Bootstrap
+- **Responsive Design**: Modern web interface with custom CSS and JavaScript
 
 ## Technology Stack
 
 - **Backend**: Flask 3.0.0
 - **Database**: MongoDB with PyMongo 4.6.0
-- **Frontend**: HTML, CSS, JavaScript with Bootstrap
+- **Frontend**: HTML, CSS, JavaScript (Vanilla)
 - **Data Format**: JSON REST API
 
 ## Installation
@@ -22,7 +22,7 @@ A Flask-based web application for managing IT company employee details with Mong
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd demo_database
+   cd employee-management-system
    ```
 
 2. **Create and activate virtual environment**
@@ -67,10 +67,10 @@ A Flask-based web application for managing IT company employee details with Mong
 
 ### Employee Management
 - `GET /api/employees` - List all employees
-- `POST /api/employees` - Create new employee
-- `GET /api/employees/<id>` - Get specific employee
-- `PUT /api/employees/<id>` - Update employee
-- `DELETE /api/employees/<id>` - Delete employee
+- `POST /api/employees` - Create new employee (requires dob and hire_date)
+- `GET /api/employees/<employee_id>` - Get specific employee
+- `PUT /api/employees/<employee_id>` - Update employee (requires dob and hire_date)
+- `DELETE /api/employees/<employee_id>` - Delete employee
 
 ### Analytics & Reports
 - `GET /api/employees/summary` - Get employee summary statistics
@@ -87,15 +87,20 @@ A Flask-based web application for managing IT company employee details with Mong
 
 ```json
 {
+  "id": "507f1f77bcf86cd799439011",
   "full_name": "John Doe",
   "email": "john.doe@company.com",
   "department": "Engineering",
   "designation": "Senior Developer",
   "experience_years": 5.5,
   "salary": 75000,
+  "dob": "1990-01-15",
+  "hire_date": "2020-03-01",
   "created_at": "2024-01-15T10:30:00Z"
 }
 ```
+
+**Note**: `dob` (date of birth) and `hire_date` are required fields for all employees.
 
 ## Project Structure
 
@@ -107,17 +112,13 @@ employee-management-system/
 ├── .gitignore                # Git ignore rules
 ├── README.md                 # Project documentation
 ├── static/                   # Static assets (CSS, JS, images)
-│   ├── advanced-dashboard.js # Advanced dashboard JavaScript
 │   ├── app.js               # Frontend JavaScript
 │   └── style.css            # Application styles
 ├── templates/                # HTML templates
-│   ├── advanced_dashboard.html # Advanced dashboard page
 │   ├── add_employee.html    # Add employee form
 │   ├── base.html            # Base template
-│   ├── employee_profile.html # Individual employee profile
 │   ├── index.html           # Dashboard page
 │   └── roster.html          # Employee roster with edit modal
-└── uploads/                  # Uploaded employee photos (created dynamically)
 ```
 
 ## Development
