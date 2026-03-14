@@ -249,7 +249,7 @@ const renderDepartmentCharts = () => {
                         {
                             label: "Headcount",
                             data: headcount,
-                            backgroundColor: "rgba(125, 79, 80, 0.65)",
+                            backgroundColor: ["#110b3d", "#6a4d8b", "#114b5f", "#474973", "#8b7aa8", "#4d4c46"],
                             borderRadius: 8,
                         },
                     ],
@@ -283,10 +283,16 @@ const renderDepartmentCharts = () => {
                         {
                             label: "Average salary (₹)",
                             data: avgSalary,
-                            tension: 0.35,
-                            borderColor: "rgba(96, 55, 60, 0.9)",
-                            backgroundColor: "rgba(96, 55, 60, 0.18)",
+                            borderColor: ["#110b3d", "#6a4d8b", "#114b5f", "#474973", "#8b7aa8", "#4d4c46"],
+                            backgroundColor: 'rgba(125, 79, 80, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.3,
                             fill: true,
+                            pointBackgroundColor: ["#110b3d", "#6a4d8b", "#114b5f", "#474973", "#8b7aa8", "#4d4c46"],
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
                         },
                     ],
                 },
@@ -862,12 +868,12 @@ const defaultChartData = {
         headcount: {
             labels: ['Development', 'Design', 'HR', 'Marketing', 'Sales'],
             data: [35, 18, 12, 15, 20],
-            colors: ['#7d4f50', '#a67c7d', '#d4a5a6', '#e8c4c5', '#f2d9da']
+            colors: ['#110b3d', '#6a4d8b', '#114b5f', '#474973', '#8b7aa8', '#4d4c46']
         },
         avgSalary: {
             labels: ['Development', 'Design', 'HR', 'Marketing', 'Sales'],
             data: [85000, 65000, 55000, 60000, 70000],
-            colors: ['#7d4f50', '#a67c7d', '#d4a5a6', '#e8c4c5', '#f2d9da']
+            colors: ['#110b3d', '#6a4d8b', '#114b5f', '#474973', '#8b7aa8', '#4d4c46']
         }
     },
     salaryTrends: {
@@ -876,36 +882,36 @@ const defaultChartData = {
             {
                 label: 'Development',
                 data: [75000, 78000, 80000, 82000, 84000, 85000],
-                borderColor: '#7d4f50',
-                backgroundColor: 'rgba(125, 79, 80, 0.1)',
+                borderColor: '#110b3d',
+                backgroundColor: 'rgba(17, 11, 61, 0.1)',
                 tension: 0.3
             },
             {
                 label: 'Design',
                 data: [55000, 58000, 60000, 62000, 64000, 65000],
-                borderColor: '#a67c7d',
-                backgroundColor: 'rgba(166, 124, 125, 0.1)',
+                borderColor: '#6a4d8b',
+                backgroundColor: 'rgba(106, 77, 139, 0.1)',
                 tension: 0.3
             },
             {
                 label: 'HR',
                 data: [45000, 48000, 50000, 52000, 54000, 55000],
-                borderColor: '#d4a5a6',
-                backgroundColor: 'rgba(212, 165, 166, 0.1)',
+                borderColor: '#114b5f',
+                backgroundColor: 'rgba(17, 75, 95, 0.1)',
                 tension: 0.3
             },
             {
                 label: 'Marketing',
                 data: [50000, 53000, 56000, 58000, 59000, 60000],
-                borderColor: '#e8c4c5',
-                backgroundColor: 'rgba(232, 196, 197, 0.1)',
+                borderColor: '#474973',
+                backgroundColor: 'rgba(71, 73, 115, 0.1)',
                 tension: 0.3
             },
             {
                 label: 'Sales',
                 data: [60000, 63000, 65000, 67000, 69000, 70000],
-                borderColor: '#f2d9da',
-                backgroundColor: 'rgba(242, 217, 218, 0.1)',
+                borderColor: '#8b7aa8',
+                backgroundColor: 'rgba(139, 122, 168, 0.1)',
                 tension: 0.3
             }
         ]
@@ -1111,12 +1117,12 @@ const renderAverageSalaryTrendChart = () => {
                 datasets: [{
                     label: 'Average Salary',
                     data: data.data,
-                    borderColor: '#7d4f50',
+                    borderColor: ["#110b3d", "#6a4d8b", "#114b5f", "#474973", "#8b7aa8", "#4d4c46"],
                     backgroundColor: 'rgba(125, 79, 80, 0.1)',
                     borderWidth: 3,
                     tension: 0.3,
                     fill: true,
-                    pointBackgroundColor: '#7d4f50',
+                    pointBackgroundColor: ["#110b3d", "#6a4d8b", "#114b5f", "#474973", "#8b7aa8", "#4d4c46"],
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     pointRadius: 6,

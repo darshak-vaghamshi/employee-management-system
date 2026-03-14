@@ -790,7 +790,11 @@ body {
 
     padding: 4px;
 
-    gap: 4px;
+    gap: 2px;
+
+    min-width: fit-content;
+
+    flex-shrink: 0;
 
 }
 
@@ -1026,7 +1030,11 @@ body {
 
         padding: 3px;
 
-        gap: 3px;
+        gap: 2px;
+
+        min-width: fit-content;
+
+        flex-shrink: 0;
 
     }
 

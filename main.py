@@ -184,7 +184,7 @@ def create_app() -> Flask:
         }
         
         # Create trend lines for each department
-        colors = ["#7d4f50", "#a67c7d", "#d4a5a6", "#e8c4c5", "#f2d9da"]
+        colors = ["#110b3d", "#6a4d8b", "#114b5f", "#474973", "#8b7aa8", "#4d4c46"]
         for i, dept_name in enumerate(dept_labels[:5]):  # Limit to top 5 departments
             base_salary = avg_salary_data[i] if i < len(avg_salary_data) else 60000
             # Generate realistic trend data
